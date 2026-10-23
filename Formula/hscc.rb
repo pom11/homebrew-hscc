@@ -54,14 +54,22 @@ class Hscc < Formula
   allow_network_access! :build
 
   def install
-    source_root = buildpath/"hscc-#{version}"
-    odie "expected the release tarball to extract into hscc-#{version}/" unless (source_root/"VERSION").exist?
+    # Homebrew stages this archive inside the extracted `hscc-#{version}/`
+    # directory, so `buildpath` IS the repository root.
+    odie "expected the release tarball to carry VERSION at its root" unless (buildpath/"VERSION").exist?
 
     # The FULL repository tree lands in libexec, renamed to a version-stable
-    # path so nothing else has to learn the version. `hscc bootstrap` runs from
-    # this tree later on (hscc-bootstrap/bootstrap.sh, hscc_daemon/, ...).
-    libexec.install source_root => "hscc"
+    # path so nothing else has to learn the version: hscc_daemon/,
+    # hscc-cluster/, hscc-project/, hscc-bootstrap/, hscc-cli/, VERSION,
+    # requirements.txt, README.md, CHANGELOG.md. `hscc bootstrap` runs from
+    # this tree later on. `.brew_home` is Homebrew's scratch $HOME, not repo
+    # content, so it stays behind.
     tree = libexec/"hscc"
+    buildpath.children.each do |child|
+      next if child.basename.to_s == ".brew_home"
+
+      tree.install child
+    end
 
     venv = virtualenv_create(libexec/"venv", python3, system_site_packages: false)
     venv.pip_install resources
@@ -73,21 +81,23 @@ class Hscc < Formula
     # How `import hscc_daemon` resolves — the CLI's own candidate scan, in
     # hscc-cli/hscc_cli/__init__.py, is:
     #
-    #   1. Path(hscc_cli.__file__).parent.parent/"plugins"
+    #   1. Path(hscc_cli.__file__).resolve().parent.parent/"plugins"
     #   2. ~/.hermes/plugins
     #   3. four parents up from hscc_cli (the dev repo root)
     #
     # pip installs hscc_cli into venv/lib/pythonX.Y/site-packages, so candidate
-    # 1 is `<venv>/.../site-packages/plugins`. That is the candidate this layout
-    # satisfies: the symlink below makes it point at the libexec tree, which
-    # holds hscc_daemon/ next to VERSION. It is created BEFORE any candidate
-    # check matters (the scan runs at import time) and it must exist, because on
-    # a machine where ~/.hermes/plugins is present candidate 2 would otherwise
-    # win and import whichever daemon happens to be bootstrapped there — or, on
-    # a clean machine, nothing would resolve at all.
+    # 1 is `<venv>/.../site-packages/plugins`. That path itself must BE the
+    # symlink to the libexec tree (which holds hscc_daemon/ next to VERSION), so
+    # candidate 1 hits unconditionally. `install_symlink` is called on
+    # site-packages — not on `plugins` — because it names the link after its
+    # argument: calling it on `plugins` would mkpath `plugins/` and create
+    # `plugins/hscc` inside it, candidate 1 would then miss, and on a machine
+    # with a bootstrapped Hermes candidate 2 would silently win instead (an
+    # import of whatever daemon lives in ~/.hermes/plugins, not of this keg).
     plugins = venv.site_packages/"plugins"
-    odie "unexpected hscc_cli install layout at #{plugins}" if plugins.exist?
-    plugins.install_symlink tree
+    odie "unexpected hscc_cli install layout at #{plugins}" if plugins.exist? || plugins.symlink?
+    # Relative link inside the keg: site-packages -> ../../../../hscc.
+    venv.site_packages.install_symlink tree => "plugins"
   end
 
   def caveats
@@ -108,7 +118,7 @@ class Hscc < Formula
     # --version reads #{libexec}/hscc/VERSION through hscc_daemon.__file__ and
     # exits before any dispatch, so this proves the import chain AND that no
     # bootstrap step was needed.
-    assert_equal "hscc #{version}", shell(bin/"hscc", "--version").strip
-    assert_match "usage", shell(bin/"hscc", "--help").downcase
+    assert_equal "hscc #{version}", shell_output("#{bin}/hscc --version").strip
+    assert_match "usage", shell_output("#{bin}/hscc --help").downcase
   end
 end
