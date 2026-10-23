@@ -108,7 +108,7 @@ class Hscc < Formula
     # --version reads #{libexec}/hscc/VERSION through hscc_daemon.__file__ and
     # exits before any dispatch, so this proves the import chain AND that no
     # bootstrap step was needed.
-    assert_equal "hscc #{version}", shell("#{bin}/hscc", "--version").strip
-    assert_match "usage", shell("#{bin}/hscc", "--help").downcase
+    assert_equal "hscc #{version}", shell(bin/"hscc", "--version").strip
+    assert_match "usage", shell(bin/"hscc", "--help").downcase
   end
 end
