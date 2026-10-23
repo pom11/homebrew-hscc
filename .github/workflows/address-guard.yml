@@ -1,0 +1,18 @@
+name: address-guard
+
+# Public repo: a real LAN host or tailnet address in a commit is a leak, not a
+# typo. Same rule and same detector as the hscc repository — this file is a
+# vendored copy of hscc's scripts/address_guard.py, so keep it in sync.
+on:
+  push:
+  pull_request:
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python3 .github/address_guard.py --tracked
