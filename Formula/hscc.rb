@@ -3,8 +3,8 @@ class Hscc < Formula
 
   desc "Hermes Spark Cluster Control — CLI and daemon for a DGX Spark fleet"
   homepage "https://github.com/pom11/hscc"
-  url "https://github.com/pom11/hscc/archive/refs/tags/v2.15.0.tar.gz"
-  sha256 "6e4aa00171831cd6ffecad4acbb9f55106652ad90dab0ccda46da29fba75dfcc"
+  url "https://github.com/pom11/hscc/archive/refs/tags/v2.15.1.tar.gz"
+  sha256 "cf438f35c3dfb9d46bfb698a602468a1b5f9018ac221c0456ea61bf6cc1c6cd8"
   license "MIT"
 
   livecheck do
