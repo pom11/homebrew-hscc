@@ -26,7 +26,7 @@ class Hscc < Formula
   # ruamel.yaml: Hermes v0.23.0's board-read chain (hermes_cli.kanban_db -> utils ->
   # hermes_yaml) imports it eagerly; tracks Hermes' own pin. Pure Python here:
   # the optional ruamel.yaml.clib C loader is not needed.
-  resource "ruamel.yaml" do
+  resource "ruamel-yaml" do
     url "https://files.pythonhosted.org/packages/9f/c7/ee630b29e04a672ecfc9b63227c87fd7a37eb67c1bf30fe95376437f897c/ruamel.yaml-0.18.16.tar.gz"
     sha256 "a6e587512f3c998b2225d68aa1f35111c29fad14aed561a26e73fab729ec5e5a"
   end
