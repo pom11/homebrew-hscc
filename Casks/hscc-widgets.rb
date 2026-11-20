@@ -1,8 +1,8 @@
 cask "hscc-widgets" do
-  version "1.4.1"
-  sha256 "f7bce0d98bd384e9a324667a9eb4f7666967ee3229cc01cf460a6c0ff114ea88"
+  version "1.4.2"
+  sha256 "fce5f199df4fdef7e6a7dcebda2ef82bdd4052a49bfa85d64d51690a820dd1f3"
 
-  url "https://github.com/pom11/hscc/releases/download/apps-v1.4.1/HSCC-Widgets-1.4.1.zip"
+  url "https://github.com/pom11/hscc/releases/download/apps-v1.4.2/HSCC-Widgets-1.4.2.zip"
   name "HSCC Widgets"
   desc "Menu bar client and desktop widgets for an HSCC cluster"
   homepage "https://github.com/pom11/hscc"
